@@ -1,0 +1,365 @@
+package com.mycompany;
+
+import java.util.Scanner;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+
+public class Main {
+
+    private static final String CARPETA_DATOS = "Datos/";
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    private static List<Vendedor> vendedores = new ArrayList<>();
+    private static List<Producto> productos = new ArrayList<>();
+    private static List<Venta> ventas = new ArrayList<>();
+
+    public static void main(String[] args) {
+        System.setOut(new java.io.PrintStream(System.out, true, StandardCharsets.UTF_8));
+        System.setErr(new java.io.PrintStream(System.err, true, StandardCharsets.UTF_8));
+
+        crearDirectorioSiNoExiste();
+        cargarVendedoresDesdeCSV();// Cargar vendedores al iniciar
+        cargarProductosDesdeCSV();// Cargar productos al iniciar
+
+        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8);
+
+        while (true) {
+            System.out.println("\nMENÚ PRINCIPAL");
+            System.out.println("1. Registrar vendedores");
+            System.out.println("2. Registrar productos");
+            System.out.println("3. Registrar ventas");
+            System.out.println("4. Generar archivos CSV");
+            System.out.println("5. Salir");
+            System.out.println("6. Ver inventario actual");
+            System.out.println("7. Modificar vendedor");
+            System.out.println("8. Modificar producto");
+            System.out.print("Seleccione una opción (1-8): ");
+
+            String opcion = scanner.nextLine();
+
+            try {
+                switch (opcion) {
+                    case "1":
+                        registrarVendedores(scanner);
+                        break;
+                    case "2":
+                        registrarProductos(scanner);
+                        break;
+                    case "3":
+                        registrarVentas(scanner);
+                        break;
+                    case "4":
+                        generarArchivosCSV();
+                        break;
+                    case "5":
+                        System.out.println("Saliendo del sistema...");
+                        return;
+                    case "6":
+                        mostrarInventarioActual();
+                        break;
+                     case "7":
+                        modificarVendedor(scanner);
+                        break;
+                    case "8":
+                        modificarProducto(scanner);
+                        break;
+                    default:
+                        System.out.println("Opción inválida. Intente nuevamente.");
+                }
+            } catch (IOException e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
+    }
+    private static void registrarVendedores(Scanner scanner) throws IOException {
+        System.out.println("\nREGISTRO DE VENDEDORES");
+        System.out.print("¿Cuántos vendedores desea registrar? ");
+        int cantidad = leerEnteroPositivo(scanner);
+
+        for (int i = 0; i < cantidad; i++) {
+            System.out.println("\nVendedor #" + (i + 1));
+
+            // Pedimos la fecha de ingreso
+            System.out.print("Ingrese la fecha de ingreso (YYYY-MM-DD): "); String fechaStr = scanner.nextLine();
+            LocalDate fechaIngreso = LocalDate.parse(fechaStr, DATE_FORMAT);
+
+            // Registrar el vendedor con la fecha
+            vendedores.add(Vendedor.crearVendedor(scanner, fechaIngreso));
+        }
+        System.out.println("\n" + cantidad + " vendedores registrados en memoria.");
+    }
+    private static void registrarProductos(Scanner scanner) throws IOException {
+        System.out.println("\nREGISTRO DE PRODUCTOS");
+        System.out.print("¿Cuántos productos desea registrar? ");
+        int cantidad = leerEnteroPositivo(scanner);
+
+        for (int i = 0; i < cantidad; i++) {
+            System.out.println("\nProducto #" + (i + 1));
+
+            // Pedimos la fecha de ingreso
+             System.out.print("Ingrese la fecha de registro (YYYY-MM-DD): "); String fechaStr = scanner.nextLine();
+            LocalDate fechaIngreso = LocalDate.parse(fechaStr, DATE_FORMAT);
+
+            // Registrar el producto con la fecha
+            productos.add(Producto.crearProducto(scanner, fechaIngreso));
+        }
+        System.out.println("\n" + cantidad + " productos registrados en memoria.");
+    }    
+    
+    private static void registrarVentas(Scanner scanner) throws IOException {
+        System.out.println("\nREGISTRO DE VENTAS");
+        System.out.print("¿Cuántas ventas desea registrar? ");
+        int cantidad = leerEnteroPositivo(scanner);
+
+        for (int i = 0; i < cantidad; i++) {
+            System.out.println("\nVenta #" + (i + 1));
+            System.out.print("Fecha de venta (YYYY-MM-DD): ");
+            LocalDate fecha = LocalDate.parse(scanner.nextLine(), DATE_FORMAT);
+
+            Venta venta = Venta.crearVenta(scanner);
+
+            Producto producto = buscarProductoPorId(venta.getIdProducto());
+            if (producto == null) {
+                System.out.println("Producto con ID " + venta.getIdProducto() + " no encontrado. Venta no registrada.");
+                continue;
+            }
+
+            if (producto.getStock() < venta.getCantidad()) {
+                System.out.println("Stock insuficiente para el producto " + producto.getNombre() +
+                        ". Venta no registrada.");
+                continue;
+            }
+
+            producto.reducirStock(venta.getCantidad());
+            venta.setFecha(fecha);
+            ventas.add(venta);
+        }
+        System.out.println("\nVentas registradas en memoria.");
+    }
+    
+       private static Producto buscarProductoPorId(int idProducto) {
+        for (Producto p : productos) {
+            if (p.getId() == idProducto) return p;
+        }
+        return null;
+    }
+
+    private static Vendedor buscarVendedorPorId(int idVendedor) {
+        for (Vendedor v : vendedores) {
+            if (v.getId() == idVendedor) return v;
+        }
+        return null;
+    }
+    
+       private static void generarArchivosCSV() throws IOException {
+        if (vendedores.isEmpty() && productos.isEmpty() && ventas.isEmpty()) {
+            System.out.println("\nNo hay datos registrados para generar archivos.");
+            return;
+        }
+
+        guardarEnCSV("vendedores.csv",
+                "id,nombre,idIdentificacion,ciudad,pais\n",
+                vendedores, v -> String.format("%d,%s,%s,%s,%s",
+                        v.getId(), v.getNombre(), v.getIdIdentificacion(),
+                        v.getCiudad(), v.getPais()));
+
+        guardarEnCSV("productos.csv",
+                "id,nombre,marca,valorCompra,stock\n",
+                productos, p -> String.format("%d,%s,%s,%.2f,%d",
+                        p.getId(), p.getNombre(), p.getMarca(),
+                        p.getValorCompra(), p.getStock()));
+
+        guardarEnCSV("ventas.csv",
+                "id,id_vendedor,id_producto,cantidad,precio_venta,fecha\n",
+                ventas, v -> String.format("%d,%d,%d,%d,%.2f,%s",
+                v.getId(), v.getIdVendedor(), v.getIdProducto(),
+                        v.getCantidad(), v.getPrecioVenta(), v.getFecha()));
+
+        System.out.println("\nArchivos CSV generados exitosamente en: " + CARPETA_DATOS);
+    }
+        private static <T> void guardarEnCSV(String filename, String cabecera,
+                                         List<T> datos, FormateadorCSV<T> formateador)
+            throws IOException {
+        File archivo = new File(CARPETA_DATOS + filename);
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(archivo, StandardCharsets.UTF_8))) {
+            writer.write(cabecera);
+            for (T item : datos) {
+                writer.write(formateador.formatear(item) + "\n");
+            }
+        }
+    }
+
+        private static void crearDirectorioSiNoExiste() {
+        File directorio = new File(CARPETA_DATOS);
+        if (!directorio.exists()) {
+            directorio.mkdir();
+        }
+    }
+    private static void cargarProductosDesdeCSV() {
+                File archivo = new File(CARPETA_DATOS + "productos.csv");
+        if (!archivo.exists()) return;
+
+        try (Scanner scanner = new Scanner(archivo, StandardCharsets.UTF_8)) {
+            if (scanner.hasNextLine()) scanner.nextLine(); // cabecera
+            while (scanner.hasNextLine()) {
+                String[] campos = scanner.nextLine().split(",");
+                int id = Integer.parseInt(campos[0]);
+                String nombre = campos[1];
+                String marca = campos[2];
+                double valorCompra = Double.parseDouble(campos[3]);
+                int stock = Integer.parseInt(campos[4]);
+                Producto p = new Producto(nombre, marca, valorCompra, stock, LocalDate.now());
+                Producto.setIdCounterManual(id);
+                productos.add(p);
+            }
+        } catch (Exception e) {
+            System.out.println("Error al cargar productos: " + e.getMessage());
+        }
+    }
+    private static void cargarVendedoresDesdeCSV() {
+        File archivo = new File(CARPETA_DATOS + "vendedores.csv");
+        if (!archivo.exists()) return;
+
+        try (Scanner scanner = new Scanner(archivo, StandardCharsets.UTF_8)) {
+            if (scanner.hasNextLine()) scanner.nextLine(); // cabecera
+            while (scanner.hasNextLine()) {
+                String[] campos = scanner.nextLine().split(",");
+                int id = Integer.parseInt(campos[0]);
+                String nombre = campos[1];
+                String idIdentificacion = campos[2];
+                String ciudad = campos[3];
+                String pais = campos[4];
+                LocalDate fechaIngreso = LocalDate.now();
+
+                Vendedor v = new Vendedor(nombre, "", idIdentificacion, ciudad, pais, fechaIngreso);
+                Vendedor.setIdCounterManual(id);
+                vendedores.add(v);
+            }
+        } catch (Exception e) {
+            System.out.println("Error al cargar vendedores: " + e.getMessage());
+        }
+    }
+        private static int leerEnteroPositivo(Scanner scanner) {
+        while (true) {
+            try {
+                int numero = Integer.parseInt(scanner.nextLine());
+                if (numero > 0) {
+                    return numero;
+                } else {
+                    System.out.println("Por favor ingrese un número positivo.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Por favor ingrese un número válido.");
+            }
+        }
+    }
+
+        private static void mostrarInventarioActual() {
+        System.out.println("\nINVENTARIO ACTUAL");
+        System.out.println("Vendedores:");
+        for (Vendedor v : vendedores) {
+            System.out.println(v);
+        }
+
+        System.out.println("\nProductos:");
+        for (Producto p : productos) {
+            System.out.println(p);
+        }
+     }
+     private static void modificarVendedor(Scanner scanner) {
+        System.out.println("\nMODIFICAR VENDEDOR");
+        System.out.print("Ingrese el ID del vendedor a modificar: ");
+        int idVendedor = Integer.parseInt(scanner.nextLine());
+
+        Vendedor vendedor = buscarVendedorPorId(idVendedor);
+        if (vendedor == null) {
+            System.out.println("Vendedor no encontrado.");
+            return;
+        }
+
+        System.out.println("Vendedor encontrado: " + vendedor);
+        System.out.println("¿Qué desea modificar?");
+        System.out.println("1. Nombre");
+        System.out.println("2. ID Identificación");
+        System.out.println("3. Ciudad");
+        System.out.println("4. País");
+        System.out.print("Seleccione una opción (1-4): ");
+        String opcion = scanner.nextLine();
+
+        switch (opcion) {
+            case "1":
+                System.out.print("Ingrese el nuevo nombre: ");
+                vendedor.setNombre(scanner.nextLine());
+                break;
+            case "2":
+                System.out.print("Ingrese el nuevo ID de identificación: ");
+                vendedor.setIdIdentificacion(scanner.nextLine());
+                break;
+            case "3":
+                System.out.print("Ingrese la nueva ciudad: ");
+                vendedor.setCiudad(scanner.nextLine());
+                break;
+            case "4":
+                System.out.print("Ingrese el nuevo país: ");
+                vendedor.setPais(scanner.nextLine());
+                break;
+        }
+        System.out.println("Vendedor modificado correctamente.");
+     }
+
+        private static void modificarProducto(Scanner scanner) {
+        System.out.println("\nMODIFICAR PRODUCTO");
+        System.out.print("Ingrese el ID del producto a modificar: ");
+        int idProducto = Integer.parseInt(scanner.nextLine());
+
+        Producto producto = buscarProductoPorId(idProducto);
+        if (producto == null) {
+            System.out.println("Producto no encontrado.");
+            return;
+        }
+
+        System.out.println("Producto encontrado: " + producto);
+        System.out.println("¿Qué desea modificar?");
+        System.out.println("1. Nombre");
+        System.out.println("2. Marca");
+        System.out.println("3. Valor de compra");
+        System.out.println("4. Stock");
+        System.out.print("Seleccione una opción (1-4): ");
+        String opcion = scanner.nextLine();
+
+        switch (opcion) {
+            case "1":
+                System.out.print("Ingrese el nuevo nombre: ");
+                producto.setNombre(scanner.nextLine());
+                break;
+            case "2":
+                System.out.print("Ingrese la nueva marca: ");
+                producto.setMarca(scanner.nextLine());
+                break;
+            case "3":
+                System.out.print("Ingrese el nuevo valor de compra: ");
+                producto.setValorCompra(Double.parseDouble(scanner.nextLine()));
+                break;
+            case "4":
+                System.out.print("Ingrese el nuevo stock: ");
+                producto.setStock(Integer.parseInt(scanner.nextLine()));
+                break;
+            default:
+                System.out.println("Opción inválida.");
+        }
+
+        System.out.println("Producto modificado correctamente.");
+    }
+}
+
+interface FormateadorCSV<T> {
+    String formatear(T item);
+}
