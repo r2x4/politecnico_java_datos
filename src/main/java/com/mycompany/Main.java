@@ -1,7 +1,7 @@
 package com.mycompany;
 
 import java.util.Scanner;
-import java.util.List;1
+import java.util.List;
 import java.util.ArrayList;
 import java.io.FileWriter;
 import java.io.IOException;
