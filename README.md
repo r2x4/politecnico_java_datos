@@ -45,41 +45,8 @@ Este proyecto fue desarrollado por estudiantes del Politécnico Grancolombiano c
 - **Manejo de errores**: Mejorar las validaciones y excepciones durante el ingreso y escritura de datos.
 
 # estructura del proyecto
-C:.
-├───.idx
-├───.vscode
-├───Datos
-├───src
-│   ├───main
-│   │   ├───java
-│   │   │   └───com
-│   │   │       └───mycompany
-│   │   └───resources
-│   └───test
-│       └───java
-│           └───com
-│               └───example
-│                   └───demo
-└───target
-    ├───classes
-    │   └───com
-    │       └───mycompany
-    ├───generated-sources
-    │   └───annotations
-    ├───generated-test-sources
-    │   └───test-annotations
-    ├───maven-archiver
-    ├───maven-status
-    │   └───maven-compiler-plugin
-    │       ├───compile
-    │       │   └───default-compile
-    │       └───testCompile
-    │           └───default-testCompile
-    ├───surefire-reports
-    └───test-classes
-        └───com
-            └───example
-                └───demo
+![image](https://github.com/user-attachments/assets/359c54f3-661f-4187-ac38-4b30270a8d6a)
+
 
 
 Alumnos del Grupo G12 – Politécnico Grancolombiano:
