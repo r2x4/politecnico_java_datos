@@ -45,18 +45,43 @@ Este proyecto fue desarrollado por estudiantes del Politécnico Grancolombiano c
 - **Manejo de errores**: Mejorar las validaciones y excepciones durante el ingreso y escritura de datos.
 
 ## Estructura de Carpetas
+C:.
+├───.idx
+├───.vscode
+├───Datos
+├───src
+│   ├───main
+│   │   ├───java
+│   │   │   └───com
+│   │   │       └───mycompany
+│   │   └───resources
+│   └───test
+│       └───java
+│           └───com
+│               └───example
+│                   └───demo
+└───target
+    ├───classes
+    │   └───com
+    │       └───mycompany
+    ├───generated-sources
+    │   └───annotations
+    ├───generated-test-sources
+    │   └───test-annotations
+    ├───maven-archiver
+    ├───maven-status
+    │   └───maven-compiler-plugin
+    │       ├───compile
+    │       │   └───default-compile
+    │       └───testCompile
+    │           └───default-testCompile
+    ├───surefire-reports
+    └───test-classes
+        └───com
+            └───example
+                └───demo
 
-```bash
-java_poli/
-├── Datos/                          # Archivos CSV generados
-├── src/
-│   ├── main/java/com/mycompany/    # Clases principales del proyecto
-│   ├── resources/
-│   └── test/java/com/example/demo/ # Archivos de prueba (pendiente)
-├── target/                         # Archivos generados por compilación
-│   └── ...
 
-Créditos del Proyecto
 Alumnos del Grupo G12 – Politécnico Grancolombiano:
 
 Wilson Iván Ríos Gutiérrez
