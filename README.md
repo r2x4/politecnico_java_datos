@@ -44,7 +44,7 @@ Este proyecto fue desarrollado por estudiantes del Politécnico Grancolombiano c
 - **Persistencia de datos**: Implementar acumulación de registros entre ejecuciones.
 - **Manejo de errores**: Mejorar las validaciones y excepciones durante el ingreso y escritura de datos.
 
-## Estructura de Carpetas
+# estructura del proyecto
 C:.
 ├───.idx
 ├───.vscode
