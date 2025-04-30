@@ -61,6 +61,6 @@ José Luis Ríos León
 
 Richard Henry De Jesús Rincón Montealegre
 
-Profesor: Víctor Fabian Castro Pérez
-Curso: Conceptos Fundamentales de Programación
-Salón: B02
+-Profesor: Víctor Fabian Castro Pérez
+-Curso: Conceptos Fundamentales de Programación
+-Salón: B02
