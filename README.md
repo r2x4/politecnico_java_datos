@@ -48,11 +48,19 @@ Este proyecto fue desarrollado por estudiantes del Politécnico Grancolombiano c
 ![image](https://github.com/user-attachments/assets/359c54f3-661f-4187-ac38-4b30270a8d6a)
 
 Alumnos del Grupo G12 – Politécnico Grancolombiano:
+
 Wilson Iván Ríos Gutiérrez
+
 Rodrigo Rocha Sierra
+
 Jhoan Sebastián Ramos Rodríguez
+
 José Luis Ríos León
+
 Richard Henry De Jesús Rincón Montealegre
+
 Profesor: Víctor Fabian Castro Pérez
+
 Curso: Conceptos Fundamentales de Programación
+
 Salón: B02
